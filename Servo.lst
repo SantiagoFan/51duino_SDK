@@ -1,0 +1,103 @@
+C51 COMPILER V9.00   SERVO                                                                 09/06/2015 20:47:09 PAGE 1   
+
+
+C51 COMPILER V9.00, COMPILATION OF MODULE SERVO
+OBJECT MODULE PLACED IN Servo.obj
+COMPILER INVOKED BY: d:\Keil\C51\BIN\C51.EXE Source\Servo.c BROWSE INCDIR(..\电机控制) DEBUG OBJECTEXTEND PRINT(.\Servo.
+                    -lst) OBJECT(Servo.obj)
+
+line level    source
+
+   1          /*
+   2          版权声明：
+   3          深圳市小二极客科技（小R科技）旗下：WIFI机器人网·机器人创意工作室版权所有 www.wifi-robots.com
+   4          您可以任意修改本程序，并应用于自行研发的智能小车机器人及其他电子产品上，但是禁止用于商业牟利。
+   5          小R科技保留付诸法律起诉侵权的权利！2015-8-22
+   6          By WIFI机器人网·机器人创意工作室
+   7          */
+   8          #include "stc_new_8051.h"
+   9          #include "timer.h"
+  10          #include "steer.h"
+  11          #include "MEM.h"
+  12          #include "uart.h"
+  13          #include "Servo.h"
+  14          #include "config.h"
+  15          
+  16          uint16 se_timer[8]={SE1_Deg,SE2_Deg,SE3_Deg,SE4_Deg,SE5_Deg,SE6_Deg,SE7_Deg,SE8_Deg};//8路舵机控制接口，SE
+             -1_Deg对应1号舵机口
+  17          /*
+  18            SetServoAngle(uint16 servoNum,uint16 angle)函数
+  19            作用：设置舵机转动角度
+  20            参数：servoNum-舵机编号（范围：1-8），angle-此舵机转动的角度（范围：0-160）
+  21            返回值：无
+  22            powered by liuviking
+  23          */
+  24          void SetServoAngle(uint16 servoNum,uint16 angle)
+  25          {
+  26   1          if(servoNum>8)return;
+  27   1              if(servoNum<0)return;
+  28   1              if(angle>160)return;
+  29   1              if(angle<0)return;
+  30   1              se_timer[servoNum-1]=angle;
+  31   1      }
+  32          /*
+  33            Init_Steer(void)函数
+  34            作用：初始化各舵机通道角度值，从EEPROM扇区中读取
+  35            参数：无
+  36            返回值：无
+  37            powered by liuviking
+  38          */
+  39          void Init_Steer(void)
+  40          {
+  41   1              uint8 CheckServoAngleCount=0;
+  42   1              uint8 OrginalAngle=0;
+  43   1              uint8 i;
+  44   1              for(i=1;i<9;i++)
+  45   1              {
+  46   2                        OrginalAngle= Read_Byte(50*512+i);
+  47   2                        if(OrginalAngle == 0xFF)
+  48   2                        {
+  49   3                              CheckServoAngleCount++;
+  50   3                        }
+  51   2              }
+  52   1      
+  53   1              if(CheckServoAngleCount==8)return;
+C51 COMPILER V9.00   SERVO                                                                 09/06/2015 20:47:09 PAGE 2   
+
+  54   1          
+  55   1              for(i=1;i<9;i++)
+  56   1              {       
+  57   2                       SetServoAngle(i,Read_Byte(50*512+i)); //100*512是舵机角度存储位置
+  58   2              }
+  59   1              
+  60   1      }
+  61          /*
+  62            GetServoAngle(uint16 servoNum)函数
+  63            作用：获取指定舵机接口的角度值
+  64            参数：servoNum-需要获取的舵机口编号（范围：1-8）
+  65            返回值：角度（范围0-160）
+  66            powered by liuviking
+  67          */
+  68          uchar GetServoAngle(uint16 servoNum)
+  69          {
+  70   1          if(servoNum>8)return;
+*** WARNING C173 IN LINE 70 OF SOURCE\SERVO.C: missing return-expression
+  71   1              if(servoNum<1)return;
+*** WARNING C173 IN LINE 71 OF SOURCE\SERVO.C: missing return-expression
+  72   1              return (uchar)se_timer[servoNum-1];
+  73   1      }
+*** WARNING C291 IN LINE 73 OF SOURCE\SERVO.C: not every exit path returns a value
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    142    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =     16       2
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  3 WARNING(S),  0 ERROR(S)

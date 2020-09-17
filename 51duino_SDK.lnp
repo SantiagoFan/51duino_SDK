@@ -1,0 +1,14 @@
+"main.obj",
+"motor.obj",
+"timer.obj",
+"uart.obj",
+"SelfTest.obj",
+"Servo.obj",
+"Ultrasonic.obj",
+"LCD_12864.obj",
+"Light.obj",
+".\lib\STEER.LIB",
+".\lib\IR.LIB",
+".\lib\MEM.LIB" 
+TO "51duino_SDK" 
+RAMSIZE(256) 

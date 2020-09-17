@@ -1,0 +1,7 @@
+TRANSFER
+"main.obj",
+"motor.obj",
+"uart.obj",
+"timer.obj",
+"steer.obj" 
+TO "motor_con.LIB"

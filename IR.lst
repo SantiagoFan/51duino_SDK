@@ -1,0 +1,13 @@
+C51 COMPILER V7.50   IR                                                                    04/23/2014 22:43:59 PAGE 1   
+
+
+C51 COMPILER V7.50, COMPILATION OF MODULE IR
+OBJECT MODULE PLACED IN IR.obj
+COMPILER INVOKED BY: D:\Keil\C51\BIN\C51.EXE Source\IR.c BROWSE INCDIR(..\µç»ú¿ØÖÆ) DEBUG OBJECTEXTEND PRINT(.\IR.lst) O
+                    -BJECT(IR.obj)
+
+line level    source
+
+*** ERROR C318 OF Source\IR.c: can't open file 'Source\IR.c'
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  1 ERROR(S)

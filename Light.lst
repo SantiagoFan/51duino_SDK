@@ -1,0 +1,76 @@
+C51 COMPILER V9.00   LIGHT                                                                 09/06/2015 20:47:10 PAGE 1   
+
+
+C51 COMPILER V9.00, COMPILATION OF MODULE LIGHT
+OBJECT MODULE PLACED IN Light.obj
+COMPILER INVOKED BY: d:\Keil\C51\BIN\C51.EXE Source\Light.c BROWSE INCDIR(..\电机控制) DEBUG OBJECTEXTEND PRINT(.\Light.
+                    -lst) OBJECT(Light.obj)
+
+line level    source
+
+   1          /*
+   2          版权声明：
+   3          深圳市小二极客科技（小R科技）旗下：WIFI机器人网·机器人创意工作室版权所有 www.wifi-robots.com
+   4          您可以任意修改本程序，并应用于自行研发的智能小车机器人及其他电子产品上，但是禁止用于商业牟利。
+   5          小R科技保留付诸法律起诉侵权的权利！2015-8-22
+   6          By WIFI机器人网·机器人创意工作室
+   7          */
+   8          #include "Light.h"
+   9          #include "config.h"
+  10          #include "type.h"
+  11          #include "stc_new_8051.h"
+  12          /*P22大灯控制协议：FF040100FF开灯  FF040000FF关灯*/
+  13          
+  14          /*
+  15            MainLight_Init(void)函数
+  16            作用：大灯初始化函数，上电后默认关闭。大灯默认为P22口，拉电流形式（LED长脚接51duino P22口的+极，短脚接P2
+             -2口-极）
+  17            参数：无
+  18            返回值：无
+  19            powered by liuviking
+  20          */
+  21          void MainLight_Init(void)
+  22          {
+  23   1               MAIN_LIGHT_OFF;
+  24   1      }
+  25          
+  26          /*
+  27            OpenMainLight(void)函数
+  28            作用：开启大灯函数。大灯默认为P22口，拉电流形式
+  29            参数：无
+  30            返回值：无
+  31            powered by liuviking
+  32          */
+  33          void OpenMainLight(void)
+  34          {
+  35   1               MAIN_LIGHT_ON;
+  36   1      }
+  37          
+  38          /*
+  39            CloseMainLight(void)函数
+  40            作用：关闭大灯函数。大灯默认为P22口，拉电流形式
+  41            参数：无
+  42            返回值：无
+  43            powered by liuviking
+  44          */
+  45          void CloseMainLight(void)
+  46          {
+  47   1               MAIN_LIGHT_OFF;
+  48   1      }
+  49          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =      9    ----
+C51 COMPILER V9.00   LIGHT                                                                 09/06/2015 20:47:10 PAGE 2   
+
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

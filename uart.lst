@@ -1,0 +1,226 @@
+C51 COMPILER V9.00   UART                                                                  09/06/2015 20:47:09 PAGE 1   
+
+
+C51 COMPILER V9.00, COMPILATION OF MODULE UART
+OBJECT MODULE PLACED IN uart.obj
+COMPILER INVOKED BY: d:\Keil\C51\BIN\C51.EXE Source\uart.c BROWSE INCDIR(..\电机控制) DEBUG OBJECTEXTEND PRINT(.\uart.ls
+                    -t) OBJECT(uart.obj)
+
+line level    source
+
+   1          /*
+   2          版权声明：
+   3          深圳市小二极客科技（小R科技）旗下：WIFI机器人网·机器人创意工作室版权所有 www.wifi-robots.com
+   4          您可以任意修改本程序，并应用于自行研发的智能小车机器人及其他电子产品上，但是禁止用于商业牟利。
+   5          小R科技保留付诸法律起诉侵权的权利！2015-8-22
+   6          By WIFI机器人网·机器人创意工作室
+   7          */
+   8          #include "uart.h"
+   9          #include <stdio.h>
+  10          #include "motor.h"
+  11          #include "steer.h"
+  12          #include "mem.h"
+  13          #include "IR.h"
+  14          #include "timer.h"
+  15          #include "Servo.h"
+  16          #include "Light.h"
+  17          uint8 xdata buffer[3];
+  18          uint8 rec_flag=0;       //等于0等待接受 等于1正在接受 
+  19          extern uchar IR_Type;  
+  20          extern uchar IR_Num;
+  21          extern uchar Cruising_Flag;
+  22          extern uint16 Uart_timeout_count;
+  23          extern uint8 Left_Speed; //左侧速度
+  24          extern uint8 Right_Speed;       //右侧速度
+  25          extern uint8 Left_Speed_Hold;   //左侧速度锁存
+  26          extern uint8 Right_Speed_Hold; //右侧速度锁存
+  27          void UART_init(void)
+  28          {
+  29   1              PCON |= 0x80;           //使能波特率倍速位SMOD
+  30   1              SCON = 0x50;            //8位数据,可变波特率
+  31   1              BRT = RELOAD_COUNT;             //设定独立波特率发生器重装值
+  32   1              AUXR |= 0x04;           //独立波特率发生器时钟为Fosc,即1T
+  33   1              AUXR |= 0x01;           //串口1选择独立波特率发生器为波特率发生器
+  34   1              AUXR |= 0x10;           //启动独立波特率发生器
+  35   1              ES      =   1;    //允许串口中断
+  36   1          EA      =   1;    //开总中断
+  37   1              TI      =   1;  
+  38   1              EX0=0;
+  39   1              EX1=0;
+  40   1      }
+  41          
+  42          void UART_send_byte(uint8 byte)
+  43          {
+  44   1              ES     =   0;  //关串口中断
+  45   1          TI     =   0;  //清零串口发送完成中断请求标志
+  46   1          SBUF   =   byte;
+  47   1          while(TI ==0); //等待发送完成
+  48   1          TI     =   1;  //清零串口发送完成中断请求标志
+  49   1          ES     =   1;  //允许串口中断
+  50   1      }
+  51          
+  52          void UART_send(uint8 *Buffer, uint8 Length)
+  53          {
+  54   1              while(Length != 0)
+C51 COMPILER V9.00   UART                                                                  09/06/2015 20:47:09 PAGE 2   
+
+  55   1              {
+  56   2                      UART_send_byte(*Buffer);
+  57   2                      Buffer++;
+  58   2                      Length--;
+  59   2              }
+  60   1      
+  61   1      }
+  62          
+  63          void Communication_Decode(void)  
+  64          {       
+  65   1              uint8 i;
+  66   1      
+  67   1              if(buffer[0]==0x00)
+  68   1              {
+  69   2                      switch(buffer[1])
+  70   2                      {       
+  71   3                              case 0x01:Left_Speed=Left_Speed_Hold;Right_Speed=Right_Speed_Hold;MOTOR_GO_FORWARD; return;
+  72   3                              case 0x02:Left_Speed=Left_Speed_Hold;Right_Speed=Right_Speed_Hold;MOTOR_GO_BACK;    return;
+  73   3                              case 0x03:Left_Speed=Left_Speed_Hold;Right_Speed=Right_Speed_Hold;MOTOR_GO_LEFT;    return;
+  74   3                          case 0x04:Left_Speed=Left_Speed_Hold;Right_Speed=Right_Speed_Hold;MOTOR_GO_RIGHT;   return;
+  75   3                              case 0x00:Left_Speed=Left_Speed_Hold;Right_Speed=Right_Speed_Hold;MOTOR_GO_STOP;    return;
+  76   3      
+  77   3                              case 0x05:Left_Speed=4;Right_Speed=10;MOTOR_GO_FORWARD;return;
+  78   3                              case 0x06:Left_Speed=4;Right_Speed=10;MOTOR_GO_BACK;return;
+  79   3                              case 0x07:Left_Speed=10;Right_Speed=4;MOTOR_GO_FORWARD;return;
+  80   3                              case 0x08:Left_Speed=10;Right_Speed=4;MOTOR_GO_BACK;return;
+  81   3                              default: return;
+  82   3                      }       
+  83   2              }
+  84   1              else if(buffer[0]==0x01)
+  85   1              {
+  86   2                      if(buffer[2]>180)
+  87   2                              return;
+  88   2                              
+  89   2                      switch(buffer[1])
+  90   2                      {
+  91   3                              case 0x01:SetServoAngle(1,buffer[2]); return;
+  92   3                              case 0x02:SetServoAngle(2,buffer[2]); return;
+  93   3                              case 0x03:SetServoAngle(3,buffer[2]); return;
+  94   3                              case 0x04:SetServoAngle(4,buffer[2]); return;
+  95   3                              case 0x05:SetServoAngle(5,buffer[2]); return;
+  96   3                              case 0x06:SetServoAngle(6,buffer[2]); return;
+  97   3                              case 0x07:SetServoAngle(7,buffer[2]); return;
+  98   3                              case 0x08:SetServoAngle(8,buffer[2]); return;
+  99   3                              default : return;
+ 100   3                      }  
+ 101   2              }
+ 102   1              else if(buffer[0]==0x02)
+ 103   1              {
+ 104   2                      if(buffer[2]>10)
+ 105   2                              return;
+ 106   2                      switch(buffer[1])
+ 107   2                      {
+ 108   3                              case 0x01:Left_Speed_Hold=Left_Speed  = buffer[2]; return;
+ 109   3                              case 0x02:Right_Speed_Hold=Right_Speed = buffer[2]; return;
+ 110   3                              default : return;
+ 111   3                      }
+ 112   2              }
+ 113   1              else if (buffer[0]==0x04)//车大灯，拉电流形式，5V
+ 114   1              {
+ 115   2                       if(buffer[1]==0x01)
+ 116   2                       {
+C51 COMPILER V9.00   UART                                                                  09/06/2015 20:47:09 PAGE 3   
+
+ 117   3                          OpenMainLight(); //开灯
+ 118   3                       }
+ 119   2                       else
+ 120   2                       {
+ 121   3                              CloseMainLight(); //关灯
+ 122   3                       }
+ 123   2              
+ 124   2              
+ 125   2              }
+ 126   1              else if(buffer[0]==0x13)//模式切换开关
+ 127   1              {
+ 128   2                  switch(buffer[1])
+ 129   2                      {
+ 130   3                        case 0x01: Cruising_Flag = 0x01; break;//跟随
+ 131   3                        case 0x02: Cruising_Flag = 0x02; break;//巡线
+ 132   3                        case 0x03: Cruising_Flag = 0x03; break;//避障
+ 133   3                        case 0x04: Cruising_Flag = 0x04; break;//雷达避障
+ 134   3                        case 0x00: Cruising_Flag = 0x00; break;//正常模式
+ 135   3                        default:Cruising_Flag = 0x00; break;//正常模式
+ 136   3                      }
+ 137   2              }
+ 138   1              else if(buffer[0]==0x32)//存储舵机角度
+ 139   1              {
+ 140   2                      Earse_Section(50*512);
+ 141   2                      for(i=1;i<=8;i++)
+ 142   2                      {
+ 143   3                         Write_Byte(50*512+i,GetServoAngle(i));       
+ 144   3                      }
+ 145   2              }
+ 146   1              else if(buffer[0]==0x33)//读取舵机角度并赋值
+ 147   1              {
+ 148   2                       Init_Steer();
+ 149   2              }
+ 150   1              else
+ 151   1              {
+ 152   2                      return;
+ 153   2              }
+ 154   1      }
+ 155          
+ 156          void UART_Interrupt_Receive(void) interrupt 4
+ 157          {
+ 158   1              static uint8 i;
+ 159   1      
+ 160   1          if(RI==1)
+ 161   1          {
+ 162   2              RI  =   0;
+ 163   2              if(rec_flag==0)
+ 164   2                      {
+ 165   3                              if(SBUF==0xff)
+ 166   3                              {
+ 167   4                                      rec_flag=1;     
+ 168   4                                      Uart_timeout_count = 0;
+ 169   4                                      i=0;
+ 170   4                              }                       
+ 171   3                      }
+ 172   2                      else
+ 173   2                      {
+ 174   3                              if(SBUF==0xff)
+ 175   3                              {       
+ 176   4                                      rec_flag=0;     
+ 177   4                                      if(i==3)
+ 178   4                                      {
+C51 COMPILER V9.00   UART                                                                  09/06/2015 20:47:09 PAGE 4   
+
+ 179   5                                              Communication_Decode(); 
+ 180   5                                              //UART_init(); //       解决串口死机问题
+ 181   5                                      }
+ 182   4                                      i=0;
+ 183   4                              }
+ 184   3                              else
+ 185   3                              {
+ 186   4                                      buffer[i]=SBUF;
+ 187   4                                      i++;
+ 188   4                              }
+ 189   3                      }               
+ 190   2          }
+ 191   1          else
+ 192   1          {
+ 193   2              TI  =  0;
+ 194   2          }
+ 195   1                      
+ 196   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    719    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =      3    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =      2       1
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

@@ -1,0 +1,13 @@
+C51 COMPILER V7.50   MEM                                                                   04/23/2014 22:44:01 PAGE 1   
+
+
+C51 COMPILER V7.50, COMPILATION OF MODULE MEM
+OBJECT MODULE PLACED IN mem.obj
+COMPILER INVOKED BY: D:\Keil\C51\BIN\C51.EXE Source\mem.c BROWSE INCDIR(..\µç»ú¿ØÖÆ) DEBUG OBJECTEXTEND PRINT(.\mem.lst)
+                    - OBJECT(mem.obj)
+
+line level    source
+
+*** ERROR C318 OF Source\mem.c: can't open file 'Source\mem.c'
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  1 ERROR(S)
